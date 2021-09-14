@@ -22,10 +22,6 @@ public class CacheConfig {
         this.redisConnectionFactory = redisConnectionFactory;
     }
 
-    @Autowired
-    ObjectMapper objectMapper;
-
-
     @Bean
     public CacheManager redisCacheManager() {
         RedisCacheConfiguration redisCacheConfiguration =

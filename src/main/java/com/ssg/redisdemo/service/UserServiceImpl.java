@@ -34,6 +34,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "user", key = "#userId")
     public Optional<User> get(Long userId) {
         return userRepository.findById(userId);
     }
