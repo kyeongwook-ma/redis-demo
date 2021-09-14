@@ -2,40 +2,38 @@ package com.ssg.redisdemo.service;
 
 import com.ssg.redisdemo.entity.User;
 import com.ssg.redisdemo.repository.UserRepository;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    @Resource(name = "redisTemplate")
-    private RedisTemplate<String, String> redisTemplate;
-
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    @Cacheable("users")
-    @Override
-    public List<User> getAll() {
-        redisTemplate.opsForValue().increment("user-get", 1);
+    @Autowired
+    private ReactiveRedisTemplate<String, User> redisTemplate;
 
-        return StreamSupport.stream(userRepository.findAll().spliterator(), false)
-                .collect(Collectors.toList());
+    @Override
+    public Flux<User> getAll() {
+        return Flux.defer(() -> Flux.fromIterable(userRepository.findAll())).cache();
     }
 
     @Override
-    @Cacheable(value = "user", key = "#userId")
-    public Optional<User> get(Long userId) {
-        return userRepository.findById(userId);
+    public Mono<User> get(String userId) {
+        return redisTemplate.opsForValue()
+                .get(userId)
+                .switchIfEmpty(
+                        Mono.defer(() -> Mono.justOrEmpty(userRepository.findById(userId)))
+                                .subscribeOn(Schedulers.boundedElastic())
+                        .doOnSuccess(user -> redisTemplate.opsForValue().set(userId, user).subscribe())
+                );
     }
 }

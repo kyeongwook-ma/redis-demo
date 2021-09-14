@@ -7,8 +7,16 @@ import java.io.Serializable;
 @Entity
 public class User implements Serializable {
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Id
-    private Long id;
+    private String id;
 
     private String email;
 
@@ -40,11 +48,4 @@ public class User implements Serializable {
 
     private String tel;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
 }

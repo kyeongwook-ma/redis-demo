@@ -1,11 +1,10 @@
 package com.ssg.redisdemo.service;
 
 import com.ssg.redisdemo.entity.User;
-
-import java.util.List;
-import java.util.Optional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface UserService {
-    List<User> getAll();
-    Optional<User> get(Long userId);
+    Flux<User> getAll();
+    Mono<User> get(String userId);
 }
