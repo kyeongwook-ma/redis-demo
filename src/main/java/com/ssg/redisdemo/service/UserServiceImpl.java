@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
         return redisOperations.opsForValue().get(userId)
                 .switchIfEmpty(Mono.defer(() -> Mono.justOrEmpty(userRepository.findById(userId)))
                         .subscribeOn(Schedulers.boundedElastic())
-                        .doOnSuccess(user -> redisOperations.opsForValue().set(userId, user).subscribe())
+                        .doOnNext(user -> redisOperations.opsForValue().set(userId, user).subscribe())
                 );
     }
 }
