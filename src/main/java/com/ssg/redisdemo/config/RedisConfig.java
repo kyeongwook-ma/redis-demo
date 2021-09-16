@@ -1,6 +1,7 @@
 package com.ssg.redisdemo.config;
 
 import com.ssg.redisdemo.entity.User;
+import com.ssg.redisdemo.service.RedisMessageListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.MessageListener;
@@ -33,12 +34,12 @@ public class RedisConfig {
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(
             RedisConnectionFactory redisConnectionFactory,
-            List<MessageListener> redisMessageListeners
+            List<RedisMessageListener> redisMessageListeners
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(redisConnectionFactory);
         redisMessageListeners.forEach(
-                listener -> container.addMessageListener(listener, new ChannelTopic("topic"))
+                listener -> container.addMessageListener(listener, new ChannelTopic(listener.topic()))
         );
         return container;
     }
