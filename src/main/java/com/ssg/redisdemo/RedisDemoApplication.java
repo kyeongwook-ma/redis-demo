@@ -1,5 +1,6 @@
 package com.ssg.redisdemo;
 
+import com.ssg.redisdemo.service.MoneyTransferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -21,14 +22,29 @@ public class RedisDemoApplication implements CommandLineRunner {
     @Autowired
     RedisTemplate<String, String> redisTemplate;
 
+    @Autowired
+	MoneyTransferService moneyTransferService;
+
     public static void main(String[] args) {
         SpringApplication.run(RedisDemoApplication.class, args);
     }
 
     @Override
     public void run(String... args) throws Exception {
-        piplineSet();
+        transfer();
     }
+
+    void transfer() {
+
+    	redisTemplate.opsForHash().put("account", "a", "100");
+		redisTemplate.opsForHash().put("account", "b", "20");
+
+		moneyTransferService.transfer("a", "b", 20);
+
+		System.out.println(redisTemplate.opsForHash().get("account", "a"));
+		System.out.println(redisTemplate.opsForHash().get("account", "b"));
+
+	}
 
     void piplineSet() {
         String key = "key";
